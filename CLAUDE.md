@@ -22,7 +22,7 @@ Do not suggest manually restarting the server.
 ## Commands
 
 ```bash
-# Run the API (reload mode). This should
+# Run the API (reload mode).
 uvicorn app.main:app --reload          # or: serve  (console script → app.main:run)
 
 # Start a Celery worker (consumes the game_events queue)
