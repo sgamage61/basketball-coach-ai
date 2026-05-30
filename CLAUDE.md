@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Whenever you provide a command to start the FastAPI server, always include the --reload flag.
 
 Use:
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 
 Never suggest running uvicorn without --reload in development.
 
