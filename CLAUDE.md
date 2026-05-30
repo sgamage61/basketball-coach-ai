@@ -14,7 +14,7 @@ Never suggest running uvicorn without --reload in development.
 ## Dev Instructions
 
 The FastAPI server is always running using:
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 
 Assume all code changes are automatically reloaded by the server.
 Do not suggest manually restarting the server.
