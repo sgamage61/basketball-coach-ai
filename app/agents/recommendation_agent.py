@@ -37,6 +37,10 @@ class RecommendationAgent(BaseAgent):
             "time_remaining": validated.get("time_remaining", ""),
         }
 
+        # Publish to the shared pipeline so the orchestrator can read the
+        # synthesised recommendation directly (same pattern as upstream agents)
+        context.pipeline_data["recommendation_agent"] = data
+
         return AgentResult(agent_name=self.name, success=True, data=data)
 
     # ─── Helpers ──────────────────────────────────────────────────────────────
@@ -60,7 +64,7 @@ class RecommendationAgent(BaseAgent):
         alternatives = [a["recommendation"] for a in (high + medium)[1:3]]
 
         if not alternatives:
-            alternatives = ["Stay disciplined on defence and trust your offence"]
+            alternatives = ["Stay disciplined on defense and trust your offense"]
 
         return primary, alternatives
 

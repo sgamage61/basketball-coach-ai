@@ -224,7 +224,7 @@ POST /api/v1/game/timeout
   "quarter": 4,
   "time_remaining": "2:30",
   "confidence_score": 0.85,
-  "primary_recommendation": "Switch to zone defence to disrupt opponent rhythm",
+  "primary_recommendation": "Switch to zone defense to disrupt opponent rhythm",
   "alternative_recommendations": [
     "Double-team their primary ball-handler on every possession",
     "Push tempo off defensive rebounds to get easier buckets"
