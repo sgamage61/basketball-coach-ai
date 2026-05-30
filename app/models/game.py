@@ -1,8 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSON, UUID
+from sqlalchemy import DateTime, Integer, JSON, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -14,7 +13,7 @@ class GameState(Base):
     __tablename__ = "game_states"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(36), primary_key=True, default=lambda: str(uuid4())
     )
     game_id: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     home_team: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -55,7 +54,7 @@ class RecommendationLog(Base):
     __tablename__ = "recommendation_logs"
 
     id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid4())
+        String(36), primary_key=True, default=lambda: str(uuid4())
     )
     game_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     requesting_team: Mapped[str] = mapped_column(String(10), nullable=False)

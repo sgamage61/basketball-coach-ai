@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     openai_max_tokens: int = 2048
     openai_temperature: float = 0.3
 
-    # CORS — comma-separated string in env; list in code
+    # CORS — JSON array in env (pydantic-settings decodes list fields as JSON); list in code
     allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:8080"]
 
     # Logging
