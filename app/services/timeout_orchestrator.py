@@ -111,21 +111,10 @@ class TimeoutOrchestrator:
 
         total_ms = (time.perf_counter() - t0) * 1000
 
-        rec_data = context.pipeline_data.get("strategy", {})
-        final_data = context.pipeline_data.get("recommendation_agent", {})
-
-        # Pull outputs from the context (each agent writes to pipeline_data)
-        reco_result_data = next(
-            (t for t in traces if t.agent_name == "recommendation_agent"), None
-        )
-
-        # Build the structured response from pipeline outputs
-        pipeline_reco = context.pipeline_data.get("recommendation_agent") or {}
-
-        # The RecommendationAgent writes directly to its AgentResult.data
-        # We need to look it up via the agent result stored back in pipeline_data
-        # by __call__ — here we read the last agent's contribution via context:
-        reco_agent_output = self._extract_recommendation_output(context)
+        # The RecommendationAgent publishes its synthesised output to
+        # pipeline_data; fall back to a minimal default only if that agent
+        # failed and never wrote its key.
+        reco_agent_output = context.pipeline_data.get("recommendation_agent") or {}
 
         analytics_raw = (
             context.pipeline_data.get("analytics", {}).get("analytics_summary") or {}
@@ -181,53 +170,3 @@ class TimeoutOrchestrator:
             total_ms=round(total_ms, 1),
         )
         return response
-
-    def _extract_recommendation_output(self, context: AgentContext) -> dict:
-        """
-        The RecommendationAgent stores its data in AgentResult.data, but we
-        need it accessible after the pipeline loop.  We work around this by
-        having the agent also write to pipeline_data under its own name.
-
-        This method provides a graceful fallback if the agent failed.
-        """
-        # StrategyAgent and earlier agents write named keys; RecommendationAgent
-        # doesn't write to pipeline_data by default — we do it here via a
-        # post-hoc look through the strategy data and gs data.
-        gs = context.pipeline_data.get("game_state", {})
-        strategy = context.pipeline_data.get("strategy", {})
-        analytics = context.pipeline_data.get("analytics", {}).get("analytics_summary", {})
-
-        adjustments = strategy.get("strategy_adjustments", [])
-        high_adj = [a for a in adjustments if a.get("priority") == "high"]
-
-        primary = (
-            high_adj[0]["recommendation"]
-            if high_adj
-            else "Maintain composure and execute your system."
-        )
-        alternatives = [a["recommendation"] for a in (high_adj[1:3])]
-
-        score_diff = abs(gs.get("score_differential", 0))
-        leading = gs.get("leading_team", "tied")
-        momentum = analytics.get("momentum_team")
-
-        reasoning_parts = []
-        if leading == "tied":
-            reasoning_parts.append("Game is tied — every possession matters.")
-        else:
-            reasoning_parts.append(
-                f"Score differential: {score_diff} points. Focus and execution win close games."
-            )
-        if momentum:
-            reasoning_parts.append(
-                "Opponent has momentum — use this timeout to reset your defensive intensity."
-            )
-
-        confidence = 0.5 + (0.1 if adjustments else 0) + (0.1 if momentum else 0) + (0.05 if gs.get("is_close_game") else 0)
-
-        return {
-            "primary_recommendation": primary,
-            "alternative_recommendations": alternatives,
-            "reasoning": " ".join(reasoning_parts) or "Execute your game plan.",
-            "confidence_score": min(round(confidence, 2), 0.95),
-        }
